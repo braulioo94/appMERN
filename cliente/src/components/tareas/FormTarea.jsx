@@ -1,112 +1,108 @@
-import React,{useContext, useState, useEffect} from 'react' ;
-import proyectoContext from '../../context/proyectos/proyectoContext' ;
-import tareaContext from '../../context/tareas/tareaContext'
-
+import React, { useContext, useState, useEffect } from 'react';  
+import proyectoContext from '../../context/proyectos/proyectoContext';
+import tareaContext from '../../context/tareas/tareaContext';
 
 const FormTarea = () => {
 
-    //Extrae si un proyecto esta activo
-    const proyectosContext = useContext(proyectoContext) ;
-    const{proyecto } = proyectosContext ;
+    // Extrar si un proyecto esta activo
+    const proyectosContext = useContext(proyectoContext);
+    const { proyecto } = proyectosContext;
 
-    //Extrae tareaContext
-    const tareasContext = useContext(tareaContext) ;
-    const{agregarTareas, validarTarea, errorTarea, obtenerTareas,tareaSeleccionada,actualizarTarea,limpiarTarea} = tareasContext
+    // obtener la función del context de tarea
+    const tareasContext = useContext(tareaContext);
+    const { tareaseleccionada,  errortarea, agregarTarea, validarTarea, obtenerTareas, actualizarTarea, limpiarTarea } = tareasContext;
 
-    //Effect que detecta si hay una tarea seleccionada
+    // Effect que detecta si hay una tarea seleccionada
     useEffect(() => {
-        if(tareaSeleccionada !==null){
-            guardarTarea(tareaSeleccionada)
-        } else{
+        if(tareaseleccionada !== null) {
+            guardarTarea(tareaseleccionada)
+        } else {
             guardarTarea({
-                nombre :''
+                nombre: ''
             })
         }
-    }, [tareaSeleccionada]) ;
+    }, [  tareaseleccionada]); 
 
-
-    //State del formulario
-    const [tarea,guardarTarea] =useState({
-        nombre:''
+    // State del formulario
+    const [tarea, guardarTarea] = useState({
+        nombre: ''
     })
-    //Extrae el nombre del proyecto
-    const {nombre} =tarea
 
-    //Si no hay proyecto selecionado
-    if(!proyecto)return null ;
+    // extraer el nombre del proyecto
+    const { nombre } = tarea;
 
-    //Array destructuring para extraer el proyecto actual
-    const [proyectoActual] = proyecto ;
+    // Si no hay proyecto seleccionado
+    if(!proyecto) return null;
 
-    //Leer los valores del formulario
-    const handleChange = e =>{
-        guardarTarea(
-           { ...tarea,
-            [e.target.name]: e.target.value}
-        )
+    // Array destructuring para extraer el proyecto actual
+    const [proyectoActual] =  proyecto;
+
+    // Leer los valores del formulario
+    const handleChange = e => {
+        guardarTarea({
+            ...tarea,
+            [e.target.name] : e.target.value
+        })
     }
-    const onSubmit=e =>{
+
+    const onSubmit = e => {
         e.preventDefault();
 
-        //Validar
-        if(nombre.trim() === ''){
+        // validar
+        if(nombre.trim() === '' ) {
             validarTarea();
             return;
         }
 
-        //Si es edicion o es nueva tarea
-        if(tareaSeleccionada === null){
-            //Tarea nueva
-            //Agregar la nueva tarea al proyecto
-            tarea.proyectoID =  proyectoActual.id
-            tarea.estado=false ;
-            agregarTareas(tarea) ;
-        }else{
-            //Actualiza tarea existente
-            actualizarTarea(tarea) ;
+        // Si es edición o si es nueva tarea
+        if(tareaseleccionada === null ) {
+            // agregar la nueva tarea al state de tareas
+            tarea.proyecto = proyectoActual._id;
+            agregarTarea(tarea);
+        } else {
+            // actualizar tarea existente
+            actualizarTarea(tarea);
+
+            // Elimina tareaseleccionada del state
+            limpiarTarea();
         }
-        //Elimina tarea seleccionada del state
-        limpiarTarea()
+        // Obtener y filtrar las tareas del proyecto actual
+        obtenerTareas(proyectoActual.id);
 
-        
-
-        //Obtener y filtrar las tareas del proyecto actual
-        obtenerTareas(proyectoActual.id)
-        //Reiniciar el form
+        // reiniciar el form
         guardarTarea({
-            nombre:''
+            nombre: ''
         })
-
-
     }
 
-    
     return ( 
-        <div className='formulario'>
-            <form onSubmit={onSubmit}>
-                <div className='contenedor-input'>
+        <div className="formulario">
+            <form
+                onSubmit={onSubmit}
+            >
+                <div className="contenedor-input">
                     <input 
-                        className='input-text'
                         type="text"
-                        placeholder='Nombre Tarea...'
-                        name='nombre'
+                        className="input-text"
+                        placeholder="Nombre Tarea..."
+                        name="nombre"
                         value={nombre}
                         onChange={handleChange}
                     />
                 </div>
 
-                <div className='contenedor-input'>
+                <div className="contenedor-input">
                     <input 
-                        className='btn btn-primario btn-submit btn-block'
                         type="submit"
-                        value ={tareaSeleccionada   ? 'Editar Tarea'  :  'Agregar Tarea'}
-                        
+                        className="btn btn-primario btn-submit btn-block"
+                        value={tareaseleccionada ? 'Editar Tarea' : 'Agregar Tarea'}
                     />
                 </div>
             </form>
-            {errorTarea ?<p className='mensaje error'>El nombre de la tarea es obligatorio</p>  :null}
+
+            {errortarea ? <p className="mensaje error">El nombre de la tarea es obligatorio</p> : null }
         </div>
-    );
+     );
 }
  
 export default FormTarea;
